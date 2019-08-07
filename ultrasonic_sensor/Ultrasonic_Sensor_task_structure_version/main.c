@@ -57,48 +57,25 @@ unsigned char SM3_output = 0x00;
 
 // If paused: Do NOT toggle LED connected to PB1
 // If unpaused: toggle LED connected to PB1
-SMTick1(int state);
+SMTick1_gen_pulse(int state);
 
 //Enumeration of states.
 
-SMTick2(int state);
+SMTick2_count_length(int state);
 // Monitors button connected to PA0. 
 // When button is pressed, shared variable "pause" is toggled.
 
 
 //Enumeration of states.
 
-SMTick3(int state);
+SMTick3_LCD(int state);
 // If paused: Do NOT toggle LED connected to PB0
 // If unpaused: toggle LED connected to PB0
 
 
 
 
-//Enumeration of states.
-enum SM4_States { SM4_wait,SM4_game };
 
-// Combine blinking LED outputs from SM2 and SM3, and output on PORTB
-int SMTick4(int state) {
-	// Local Variables
-    switch(state){
-        case SM4_wait:
-            state = SM4_game;
-            break;
-        case SM4_game:
-            break;
-        default:
-            state = SM4_wait;
-    }
-    switch(state){
-        case SM4_wait:
-            break;
-        case SM4_game:
-            break;
-    }
-
-	return state;
-}
 
 // --------END User defined FSMs-----------------------------------------------
 
@@ -118,13 +95,13 @@ DDRD = 0xBF; PORTD = 0X40;
 unsigned long int SMTick1_calc = 1;
 unsigned long int SMTick2_calc = 1;
 unsigned long int SMTick3_calc = 5000;
-unsigned long int SMTick4_calc = 5000;
+
 
 //Calculating GCD
 unsigned long int tmpGCD = 1;
 tmpGCD = findGCD(SMTick1_calc, SMTick2_calc);
 tmpGCD = findGCD(tmpGCD, SMTick3_calc);
-tmpGCD = findGCD(tmpGCD, SMTick4_calc);
+
 
 //Greatest common divisor for all tasks or smallest time unit for tasks.
 unsigned long int GCD = tmpGCD;
@@ -133,37 +110,32 @@ unsigned long int GCD = tmpGCD;
 unsigned long int SMTick1_period = SMTick1_calc/GCD;
 unsigned long int SMTick2_period = SMTick2_calc/GCD;
 unsigned long int SMTick3_period = SMTick3_calc/GCD;
-unsigned long int SMTick4_period = SMTick4_calc/GCD;
+
 
 
 //Declare an array of tasks 
-static task task1, task2, task3, task4;
-task *tasks[] = { &task1, &task2, &task3, &task4 };
+static task task1, task2, task3;
+task *tasks[] = { &task1, &task2, &task3};
 const unsigned short numTasks = sizeof(tasks)/sizeof(task*);
 
 // Task 1
 task1.state = -1;//Task initial state.
 task1.period = SMTick1_period;//Task Period.
 task1.elapsedTime = SMTick1_period;//Task current elapsed time.
-task1.TickFct = &SMTick1;//Function pointer for the tick.
+task1.TickFct = &SMTick1_gen_pulse;//Function pointer for the tick.
 
 // Task 2
 task2.state = -1;//Task initial state.
 task2.period = SMTick2_period;//Task Period.
 task2.elapsedTime = SMTick2_period;//Task current elapsed time.
-task2.TickFct = &SMTick2;//Function pointer for the tick.
+task2.TickFct = &SMTick2_count_length;//Function pointer for the tick.
 
 // Task 3
 task3.state = -1;//Task initial state.
 task3.period = SMTick3_period;//Task Period.
 task3.elapsedTime = SMTick3_period; // Task current elasped time.
-task3.TickFct = &SMTick3; // Function pointer for the tick.
+task3.TickFct = &SMTick3_LCD; // Function pointer for the tick.
 
-// Task 4
-task4.state = -1;//Task initial state.
-task4.period = SMTick4_period;//Task Period.
-task4.elapsedTime = SMTick4_period; // Task current elasped time.
-task4.TickFct = &SMTick4; // Function pointer for the tick.
 
 // Set the timer and turn it on
 TimerSet(GCD);

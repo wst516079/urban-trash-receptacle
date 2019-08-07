@@ -15,31 +15,27 @@ unsigned long signal_time = 0;
 unsigned long output = 0;
 char string[10];
 unsigned char i = 0x00;
-enum SM1_States { SM1_wait, SM1_move };
-int SMTick1(int state) {
+enum SM1_gen_pulse { SM1_gen};
+int SMTick1_gen_pulse(int state) {
     switch(state){
-        case SM1_wait:
-        break;
-        case SM1_move:
+        case SM1_gen:
         break;
         default:
-        state = SM1_wait;
+        state = SM1_gen;
     }
     switch(state){
-        case SM1_wait:
+        case SM1_gen:
         PORTA = 0x00;
         _delay_us(2);
         PORTA = 0x01;
         _delay_us(10);
         PORTA = 0x00;
         break;
-        case SM1_move:
-        break;
     }
     return state;
 }
-enum SM2_States { SM2_low, SM2_high};
-int SMTick2(int state) {
+enum SM2_count_length { SM2_low, SM2_high};
+int SMTick2_count_length(int state) {
     switch(state){
         case SM2_low:
         if (!echo)
@@ -81,8 +77,8 @@ int SMTick2(int state) {
     
     return state;
 }
-enum SM3_States { SM3_show, SM3_wait};
-int SMTick3(int state) {
+enum SM3_LCD { SM3_show, SM3_wait};
+int SMTick3_LCD(int state) {
     switch(state){
         case SM3_wait:
         state = SM3_show;
